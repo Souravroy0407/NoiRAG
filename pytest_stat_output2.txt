@@ -1,0 +1,68 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.5, pytest-9.0.2, pluggy-1.6.0 -- C:\Python312\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\USER\OneDrive\Code Playground\NoiRAG
+plugins: anyio-4.11.0
+collecting ... collected 8 items
+
+noirag/tests/test_statistical_cleaner.py::test_correct_simple_typo PASSED [ 12%]
+noirag/tests/test_statistical_cleaner.py::test_correct_in_sentence FAILED [ 25%]
+noirag/tests/test_statistical_cleaner.py::test_ignore_acronyms PASSED    [ 37%]
+noirag/tests/test_statistical_cleaner.py::test_ignore_numbers PASSED     [ 50%]
+noirag/tests/test_statistical_cleaner.py::test_preserve_punctuation PASSED [ 62%]
+noirag/tests/test_statistical_cleaner.py::test_preserve_capitalization FAILED [ 75%]
+noirag/tests/test_statistical_cleaner.py::test_complex_sentence FAILED   [ 87%]
+noirag/tests/test_statistical_cleaner.py::test_ignore_short_words PASSED [100%]
+
+================================== FAILURES ===================================
+__________________________ test_correct_in_sentence ___________________________
+
+cleaner = <noirag.preprocessing.statistical.spell_cleaner.StatisticalCleaner object at 0x0000028A3605F890>
+
+    def test_correct_in_sentence(cleaner):
+        text = "Ths is a tst of teh spell checker"
+        cleaned = cleaner.clean(text)
+>       assert cleaned == "The is a test of the spell checker"
+E       AssertionError: assert 'Ths is a tst...spell checker' == 'The is a tes...spell checker'
+E         
+E         - The is a test of the spell checker
+E         + Ths is a tst of teh spell checker
+
+noirag\tests\test_statistical_cleaner.py:19: AssertionError
+________________________ test_preserve_capitalization _________________________
+
+cleaner = <noirag.preprocessing.statistical.spell_cleaner.StatisticalCleaner object at 0x0000028A3605F890>
+
+    def test_preserve_capitalization(cleaner):
+        text = "Wlcome to New Yrk"
+        cleaned = cleaner.clean(text)
+>       assert cleaned == "Welcome to New York"
+E       AssertionError: assert 'Welcome to New Yrk' == 'Welcome to New York'
+E         
+E         - Welcome to New York
+E         ?                 -
+E         + Welcome to New Yrk
+
+noirag\tests\test_statistical_cleaner.py:41: AssertionError
+____________________________ test_complex_sentence ____________________________
+
+cleaner = <noirag.preprocessing.statistical.spell_cleaner.StatisticalCleaner object at 0x0000028A3605F890>
+
+    def test_complex_sentence(cleaner):
+        text = "The quick brwn fox jumpd over teh lazy dog."
+        cleaned = cleaner.clean(text)
+        # Note: 'jumpd' -> 'jump' (edit dist 1) is higher frequency than 'jumped' (edit dist 1)
+>       assert cleaned == "The quick brown fox jump over the lazy dog."
+E       AssertionError: assert 'The quick br...teh lazy dog.' == 'The quick br...the lazy dog.'
+E         
+E         - The quick brown fox jump over the lazy dog.
+E         ?                                 -
+E         + The quick brown fox jump over teh lazy dog.
+E         ?                                +
+
+noirag\tests\test_statistical_cleaner.py:47: AssertionError
+=========================== short test summary info ===========================
+FAILED noirag/tests/test_statistical_cleaner.py::test_correct_in_sentence - A...
+FAILED noirag/tests/test_statistical_cleaner.py::test_preserve_capitalization
+FAILED noirag/tests/test_statistical_cleaner.py::test_complex_sentence - Asse...
+========================= 3 failed, 5 passed in 2.82s =========================

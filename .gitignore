@@ -1,0 +1,51 @@
+# ── Environment & Secrets ─────────────────────────────────
+.env
+.env.*
+
+# ── Python ────────────────────────────────────────────────
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+*.egg
+
+# ── Virtual Environments ─────────────────────────────────
+venv/
+.venv/
+env/
+
+# ── IDE / Editor ─────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ── OS Files ─────────────────────────────────────────────
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# ── Model Cache ──────────────────────────────────────────
+.cache/
+
+# ── Data (large files — keep structure, ignore contents) ─
+data/raw_pdfs/
+data/chunks/
+data/cleaned/
+data/noisy/
+data/noisy_versions/
+data/qa/
+data/ground_truth/
+data/index/
+
+# ── Results (regenerated from experiments) ───────────────
+results/
+
+# ── Jupyter Notebooks Checkpoints ────────────────────────
+.ipynb_checkpoints/
+
+# ── Logs ─────────────────────────────────────────────────
+*.log

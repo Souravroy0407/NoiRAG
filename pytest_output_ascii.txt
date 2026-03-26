@@ -1,0 +1,21 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.5, pytest-9.0.2, pluggy-1.6.0
+rootdir: C:\Users\USER\OneDrive\Code Playground\NoiRAG
+plugins: anyio-4.11.0
+collected 0 items / 1 error
+
+=================================== ERRORS ====================================
+__________ ERROR collecting noirag/tests/test_rule_based_cleaner.py ___________
+ImportError while importing test module 'C:\Users\USER\OneDrive\Code Playground\NoiRAG\noirag\tests\test_rule_based_cleaner.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\Python312\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+noirag\tests\test_rule_based_cleaner.py:5: in <module>
+    from noirag.preprocessing.rule_based.cleaner import RuleBasedCleaner
+E   ModuleNotFoundError: No module named 'noirag'
+=========================== short test summary info ===========================
+ERROR noirag/tests/test_rule_based_cleaner.py
+!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!
+============================== 1 error in 0.14s ===============================

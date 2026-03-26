@@ -1,0 +1,32 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.5, pytest-9.0.2, pluggy-1.6.0
+rootdir: C:\Users\USER\OneDrive\Code Playground\NoiRAG
+plugins: anyio-4.11.0
+collected 7 items
+
+noirag\tests\test_rule_based_cleaner.py F......                          [100%]
+
+================================== FAILURES ===================================
+_________________________ test_remove_garbage_strings _________________________
+
+cleaner = <noirag.preprocessing.rule_based.cleaner.RuleBasedCleaner object at 0x0000019AC5DBFB30>
+
+    def test_remove_garbage_strings(cleaner):
+        text = "Here is some text \u2022 with garbage \u25a0 in it [...] and ==="
+        cleaned = cleaner.remove_garbage_strings(text)
+        assert "?" not in cleaned
+        assert "\u25a0" not in cleaned
+        assert "===" not in cleaned
+        assert "[...]" not in cleaned
+>       assert "Here is some text   with garbage   in it   and  " == cleaned
+E       AssertionError: assert 'Here is some...in it   and  ' == 'Here is some... it [ ] and  '
+E         
+E         - Here is some text   with garbage   in it [ ] and  
+E         ?                                          ^^^
+E         + Here is some text   with garbage   in it   and  
+E         ?                                          ^
+
+noirag\tests\test_rule_based_cleaner.py:18: AssertionError
+=========================== short test summary info ===========================
+FAILED noirag/tests/test_rule_based_cleaner.py::test_remove_garbage_strings
+========================= 1 failed, 6 passed in 0.08s =========================

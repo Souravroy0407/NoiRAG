@@ -1,0 +1,53 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.5, pytest-9.0.2, pluggy-1.6.0 -- C:\Python312\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\USER\OneDrive\Code Playground\NoiRAG
+plugins: anyio-4.11.0
+collecting ... collected 8 items
+
+noirag/tests/test_statistical_cleaner.py::test_correct_simple_typo PASSED [ 12%]
+noirag/tests/test_statistical_cleaner.py::test_correct_in_sentence PASSED [ 25%]
+noirag/tests/test_statistical_cleaner.py::test_ignore_acronyms PASSED    [ 37%]
+noirag/tests/test_statistical_cleaner.py::test_ignore_numbers PASSED     [ 50%]
+noirag/tests/test_statistical_cleaner.py::test_preserve_punctuation PASSED [ 62%]
+noirag/tests/test_statistical_cleaner.py::test_preserve_capitalization PASSED [ 75%]
+noirag/tests/test_statistical_cleaner.py::test_complex_sentence FAILED   [ 87%]
+noirag/tests/test_statistical_cleaner.py::test_ignore_short_words FAILED [100%]
+
+================================== FAILURES ===================================
+____________________________ test_complex_sentence ____________________________
+
+cleaner = <noirag.preprocessing.statistical.spell_cleaner.StatisticalCleaner object at 0x000002511C147C20>
+
+    def test_complex_sentence(cleaner):
+        text = "The quick brwn fox jumpd over teh lazy dog."
+        cleaned = cleaner.clean(text)
+>       assert cleaned == "The quick brown fox jumped over the lazy dog."
+E       AssertionError: assert 'The quick br...the lazy dog.' == 'The quick br...the lazy dog.'
+E         
+E         - The quick brown fox jumped over the lazy dog.
+E         ?                         --
+E         + The quick brown fox jump over the lazy dog.
+
+noirag\tests\test_statistical_cleaner.py:46: AssertionError
+___________________________ test_ignore_short_words ___________________________
+
+cleaner = <noirag.preprocessing.statistical.spell_cleaner.StatisticalCleaner object at 0x000002511C147C20>
+
+    def test_ignore_short_words(cleaner):
+        # Short unknown words < 3 chars should generally be ignored by our filter
+        text = "xy zq abc"
+        cleaned = cleaner.clean(text)
+>       assert cleaned == "xy zq abc"
+E       AssertionError: assert 'xy zq acc' == 'xy zq abc'
+E         
+E         - xy zq abc
+E         ?        -
+E         + xy zq acc
+E         ?         +
+
+noirag\tests\test_statistical_cleaner.py:52: AssertionError
+=========================== short test summary info ===========================
+FAILED noirag/tests/test_statistical_cleaner.py::test_complex_sentence - Asse...
+FAILED noirag/tests/test_statistical_cleaner.py::test_ignore_short_words - As...
+========================= 2 failed, 6 passed in 2.39s =========================
