@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NoiRAG Dashboard — Noise-Aware Retrieval-Augmented Generation</title>
+    <meta name="description" content="Interactive benchmark dashboard for NoiRAG: Noise-Aware Retrieval-Augmented Generation">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- ═══ Navigation ═══ -->
+<nav>
+    <div class="container">
+        <div class="nav-logo">NoiRAG</div>
+        <ul class="nav-links">
+            <li><a href="#benchmarks">Benchmarks</a></li>
+            <li><a href="#comparison">Text Comparison</a></li>
+            <li><a href="#architecture">Architecture</a></li>
+            <li><a href="#metrics">Full Metrics</a></li>
+        </ul>
+    </div>
+</nav>
+
+<!-- ═══ Hero ═══ -->
+<section class="hero">
+    <div class="container">
+        <div class="hero-badge">Research Project</div>
+        <h1>NoiRAG</h1>
+        <p>Noise-Aware Retrieval-Augmented Generation — An intelligent preprocessing engine that recovers retrieval accuracy from noisy, OCR-damaged documents.</p>
+
+        <div class="stats-grid">
+            <div class="stat-card fade-in">
+                <div class="stat-value">2,002</div>
+                <div class="stat-label">QA Pairs Tested</div>
+            </div>
+            <div class="stat-card fade-in">
+                <div class="stat-value">100%</div>
+                <div class="stat-label">P@1 Recovery</div>
+            </div>
+            <div class="stat-card fade-in">
+                <div class="stat-value">3</div>
+                <div class="stat-label">Cleaning Strategies</div>
+            </div>
+            <div class="stat-card fade-in">
+                <div class="stat-value">0</div>
+                <div class="stat-label">API Costs</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══ Charts ═══ -->
+<section id="benchmarks" class="section">
+    <div class="container">
+        <div class="section-header">
+            <h2 class="section-title">📊 <span>Benchmark Results</span></h2>
+            <select class="dropdown" id="noiseSelector">
+                <option value="semantic">Semantic Noise</option>
+                <option value="formatting">Formatting Noise</option>
+            </select>
+        </div>
+        <div class="charts-grid">
+            <div class="card">
+                <h3 style="font-size:0.9rem; color:var(--text-secondary); margin-bottom:16px;">P@1 — Precision at Rank 1 vs Noise Level</h3>
+                <div class="chart-container">
+                    <canvas id="barChart"></canvas>
+                </div>
+            </div>
+            <div class="card">
+                <h3 style="font-size:0.9rem; color:var(--text-secondary); margin-bottom:16px;">Metric Radar — 75% Noise Level</h3>
+                <div class="chart-container">
+                    <canvas id="radarChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══ Text Comparison ═══ -->
+<section id="comparison" class="section">
+    <div class="container">
+        <div class="section-header">
+            <h2 class="section-title">🔍 <span>Live Text Comparison</span></h2>
+            <select class="dropdown" id="sampleSelector">
+                <option value="0">Sample 1 — Academic Paper Title</option>
+                <option value="1">Sample 2 — Research Abstract</option>
+                <option value="2">Sample 3 — Technical Content</option>
+            </select>
+        </div>
+        <div class="comparison-grid">
+            <div class="comparison-panel panel-gt">
+                <div class="panel-header"><span class="dot"></span> Ground Truth</div>
+                <div class="panel-body" id="gtText"></div>
+            </div>
+            <div class="comparison-panel panel-noisy">
+                <div class="panel-header"><span class="dot"></span> Noisy (75% Semantic)</div>
+                <div class="panel-body" id="noisyText"></div>
+            </div>
+            <div class="comparison-panel panel-cleaned">
+                <div class="panel-header"><span class="dot"></span> NoiRAG Cleaned</div>
+                <div class="panel-body" id="cleanedText"></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══ Architecture ═══ -->
+<section id="architecture" class="section">
+    <div class="container">
+        <div class="section-header">
+            <h2 class="section-title">⚙️ <span>Hybrid Triage Architecture</span></h2>
+        </div>
+        <div class="card">
+            <div class="arch-flow">
+                <div class="arch-node input">
+                    📄 Noisy Chunk
+                    <small>Raw OCR text</small>
+                </div>
+                <span class="arch-arrow">→</span>
+                <div class="arch-node scorer">
+                    📊 Quality Scorer
+                    <small>OOV + Garbage Density</small>
+                </div>
+                <span class="arch-arrow">→</span>
+                <div class="arch-node router">
+                    🔀 Hybrid Orchestrator
+                    <small>Intelligent Router</small>
+                </div>
+                <span class="arch-arrow">→</span>
+                <div class="arch-branch">
+                    <div class="arch-node cleaner">
+                        🔧 Rule-Based
+                        <small>Score &gt; 0.05</small>
+                    </div>
+                    <div class="arch-node cleaner">
+                        📈 Statistical
+                        <small>Score &gt; 0.10</small>
+                    </div>
+                    <div class="arch-node llm">
+                        🤖 LLM Cleaner
+                        <small>Score &gt; 0.60</small>
+                    </div>
+                </div>
+                <span class="arch-arrow">→</span>
+                <div class="arch-node output">
+                    ✅ Cleaned Chunk
+                    <small>Ready for FAISS</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══ Full Metrics Table ═══ -->
+<section id="metrics" class="section">
+    <div class="container">
+        <div class="section-header">
+            <h2 class="section-title">📋 <span>Full Metrics Breakdown</span></h2>
+        </div>
+        <div class="card" style="overflow-x:auto;">
+            <table class="metrics-table" id="metricsTable">
+                <thead>
+                    <tr>
+                        <th>Dataset</th>
+                        <th>P@1</th>
+                        <th>R@5</th>
+                        <th>MRR</th>
+                        <th>NDCG@5</th>
+                        <th>F1@1</th>
+                        <th>Recovery</th>
+                    </tr>
+                </thead>
+                <tbody id="metricsBody"></tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+<!-- ═══ Footer ═══ -->
+<footer>
+    <div class="container">
+        <p>NoiRAG — Noise-Aware Retrieval-Augmented Generation · Built by <a href="https://github.com/shreyabag028/NoiRAG" target="_blank">Team NoiRAG</a> · Evaluated on 2,002 QA pairs · Powered by BGE-Small + FAISS + Ollama</p>
+    </div>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>

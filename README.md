@@ -1,4 +1,4 @@
-# NoiRAG: Noise-Resilient Retrieval-Augmented Generation
+# NoiRAG: Noise-Aware Retrieval-Augmented Generation
 
 ## Project Overview
 
