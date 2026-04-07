@@ -11,27 +11,32 @@ from typing import List, Dict, Any, Tuple
 from noirag.preprocessing.hybrid.quality_scorer import QualityScorer
 from noirag.preprocessing.rule_based.cleaner import RuleBasedCleaner
 from noirag.preprocessing.statistical.spell_cleaner import StatisticalCleaner
+from noirag.preprocessing.hybrid.llm_cleaner import LLMCleaner
 
 class HybridCleaner:
     def __init__(
         self, 
         formatting_threshold: float = 0.05,
         semantic_threshold: float = 0.10,
+        llm_threshold: float = 0.95,
         verbose: bool = False
     ):
         """
         Args:
             formatting_threshold: Score above which Rule-Based cleaner is applied.
-            semantic_threshold:  OOV ratio above which Statistical cleaner is applied.
+            semantic_threshold: OOV ratio above which Statistical cleaner is applied.
+            llm_threshold: Overall score above which the heavy LLM cleaner is executed.
             verbose: If True, prints routing decisions during execution.
         """
         self.formatting_threshold = formatting_threshold
         self.semantic_threshold = semantic_threshold
+        self.llm_threshold = llm_threshold
         self.verbose = verbose
         
         self.scorer = QualityScorer()
         self.rule_cleaner = RuleBasedCleaner()
         self.stat_cleaner = StatisticalCleaner()
+        self.llm_cleaner = LLMCleaner()
         
     def clean(self, text: str) -> Tuple[str, Dict[str, Any]]:
         """
@@ -44,27 +49,33 @@ class HybridCleaner:
         scores = self.scorer.score(text)
         
         # Determine Routing
+        apply_llm = scores["overall_score"] > self.llm_threshold
         apply_rule = (scores["garbage_density"] > self.formatting_threshold or 
                       scores["formatting_anomaly_rate"] > self.formatting_threshold)
-                      
         apply_stat = scores["oov_ratio"] > self.semantic_threshold
         
         cleaned_text = text
         applied_cleaners = []
         
-        # 1. Rule-based First (Fixing line breaks helps the spell-checker)
-        if apply_rule:
-            cleaned_text = self.rule_cleaner.clean(cleaned_text)
-            applied_cleaners.append("rule_based")
-            
-        # 2. Statistical Spell-Checker Second
-        if apply_stat:
-            cleaned_text = self.stat_cleaner.clean(cleaned_text)
-            applied_cleaners.append("statistical")
+        # 0. Catastrophic Noise -> Route directly to LLM
+        if apply_llm:
+            cleaned_text = self.llm_cleaner.clean(cleaned_text)
+            applied_cleaners.append("llm")
+        else:
+            # 1. Rule-based First (Fixing line breaks helps the spell-checker)
+            if apply_rule:
+                cleaned_text = self.rule_cleaner.clean(cleaned_text)
+                applied_cleaners.append("rule_based")
+                
+            # 2. Statistical Spell-Checker Second
+            if apply_stat:
+                cleaned_text = self.stat_cleaner.clean(cleaned_text)
+                applied_cleaners.append("statistical")
             
         if self.verbose:
-            print(f"Scores: OOV={scores['oov_ratio']:.3f}, Garbage={scores['garbage_density']:.3f}, "
-                  f"Anomaly={scores['formatting_anomaly_rate']:.3f} | Routing: {applied_cleaners}")
+            print(f"Scores: Overall={scores['overall_score']:.3f}, OOV={scores['oov_ratio']:.3f}, "
+                  f"Garbage={scores['garbage_density']:.3f}"
+                  f" | Routing: {applied_cleaners}")
             
         metadata = {
             "original_scores": scores,
