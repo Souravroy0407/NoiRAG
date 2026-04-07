@@ -49,3 +49,10 @@ results/
 
 # ── Logs ─────────────────────────────────────────────────
 *.log
+
+# ── Editor Swap Files ────────────────────────────────────
+*.crswap
+
+# ── Debug / Test Output ─────────────────────────────────
+pytest_*.txt
+test_clean.json

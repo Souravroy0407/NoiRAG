@@ -1,19 +1,19 @@
 # ============================================================
-# NoiseClear-RAG — Central Configuration File
+# NoiRAG — Central Configuration File
 # ============================================================
 
 # ── Project Info ────────────────────────────────────────────
 project:
-  name: "NoiseClear-RAG"
-  version: "1.0.0"
+  name: "NoiRAG"
+  version: "2.0.0"
 
 # ── Paths ───────────────────────────────────────────────────
 paths:
   raw_pdfs: "data/raw_pdfs"
   ground_truth: "data/ground_truth"
-  noisy_versions: "data/noisy_versions"
+  noisy: "data/noisy"
+  cleaned: "data/cleaned"
   results: "results"
-  plots: "results/plots"
   tables: "results/tables"
 
 # ── Dataset ─────────────────────────────────────────────────
@@ -22,14 +22,12 @@ dataset:
     - academic
     - finance
     - textbook
-  pdfs_per_domain: 15        # start with 15, expand to 30+ later
+  pdfs_per_domain: 15
 
 # ── Noise Injection ─────────────────────────────────────────
 noise:
   levels:
-    - 0.10       # 10%
     - 0.25       # 25%
-    - 0.50       # 50%
     - 0.75       # 75%
   types:
     - semantic
@@ -40,12 +38,11 @@ preprocessing:
   strategies:
     - rule_based
     - statistical
-    - llm_based
-    - hybrid
+    - hybrid           # Hybrid = Rule + Statistical + LLM routing
   hybrid_thresholds:
-    keep_as_is: 0.85         # score > 0.85 → no cleaning needed
-    statistical: 0.60        # 0.60–0.85 → statistical cleaning
-    llm: 0.0                 # < 0.60 → LLM cleaning
+    formatting: 0.05   # OOV score > 0.05 → apply rule-based formatting fixes
+    statistical: 0.10  # OOV score > 0.10 → apply statistical spell correction
+    llm: 0.60          # Overall score > 0.60 → route to local LLM for repair
 
 # ── RAG Pipeline ─────────────────────────────────────────────
 rag:
@@ -54,19 +51,20 @@ rag:
   top_k: 5
   embedding_model: "BAAI/bge-small-en-v1.5"
 
-# ── LLM (Answer Generation) ──────────────────────────────────
-llm:
+# ── LLM Cleaning (Local Ollama) ──────────────────────────────
+llm_cleaner:
+  provider: "ollama"
+  model: "qwen2.5:0.5b"
+  base_url: "http://localhost:11434/api/chat"
+  temperature: 0.0                            # deterministic cleaning
+
+# ── LLM (Answer Generation — OpenRouter) ─────────────────────
+llm_generator:
   provider: "openrouter"
-  model: "meta-llama/llama-3-8b-instruct"     # free model on OpenRouter
+  model: "meta-llama/llama-3-8b-instruct"
   base_url: "https://openrouter.ai/api/v1"
   max_tokens: 512
-  temperature: 0.1                             # low = more factual answers
-
-# ── LLM Cleaning (Gemini) ────────────────────────────────────
-gemini:
-  model: "gemini-1.5-flash"                   # free tier
-  max_tokens: 1024
-  temperature: 0.0                            # deterministic cleaning
+  temperature: 0.1
 
 # ── Evaluation ───────────────────────────────────────────────
 evaluation:

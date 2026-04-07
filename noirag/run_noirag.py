@@ -101,7 +101,7 @@ if __name__ == "__main__":
     
     # 1. Clean the Noisy Dataset
     if not args.skip_cleaning:
-        cleaner = HybridCleaner(verbose=True)
+        cleaner = HybridCleaner(verbose=False)
         apply_preprocessing(noise_name, noisy_dir, cleaned_dir, cleaner)
     else:
         print(f"\n[1/4] Skipping Preprocessing. Using existing data at {cleaned_dir}")
