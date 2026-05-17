@@ -160,5 +160,6 @@ def evaluate_retrieval(
     # MRR (not k-dependent — uses full result list)
     mrr_scores = [mrr(item["retrieved"], item["gold_doc_name"]) for item in all_results]
     metrics["MRR"] = sum(mrr_scores) / n
+    metrics["mrr_scores_list"] = mrr_scores
 
     return metrics

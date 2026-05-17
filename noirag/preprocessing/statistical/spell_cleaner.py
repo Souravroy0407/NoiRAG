@@ -48,6 +48,10 @@ class StatisticalCleaner:
         if clean_token.isupper():
             return True
             
+        # 4. URLs, Emails, or paths
+        if '@' in clean_token or '/' in clean_token or 'http' in clean_token.lower() or 'www.' in clean_token.lower() or '.com' in clean_token.lower():
+            return True
+            
         return False
 
     def correct_word(self, token: str) -> str:
@@ -62,25 +66,45 @@ class StatisticalCleaner:
         if not core_word or self._should_ignore_token(core_word):
             return token
             
-        is_title = core_word.istitle()
+        # Ignore CamelCase or internal uppercase (e.g. PySpark, macOS, iPhone)
+        if any(c.isupper() for c in core_word[1:]):
+            return token
+            
+        # Use core_word[0].isupper() instead of istitle() because internal punctuation breaks istitle()
+        is_capitalized = core_word[0].isupper()
         is_upper = core_word.isupper()
         
+        # Do a quick check against our own micro dictionary of common technical terms
+        tech_words = {"pyspark", "preprocessing", "datasets", "dataset", "analytics", "boolean", "api", "apis", "frontend", "backend"}
+        if core_word.lower() in tech_words:
+            return token
+            
         # We query in lowercase
         suggestions = self.sym_spell.lookup(
             core_word.lower(), 
-            Verbosity.TOP,          # Return only the top suggestion
-            max_edit_distance=3     # Up to 3 edits
+            Verbosity.TOP,          
+            max_edit_distance=2     # Reduced from 3 to prevent aggressive butchering
         )
         
         if not suggestions:
             return token # No correction found
             
-        best_correction = suggestions[0].term
+        best_suggestion = suggestions[0]
+        best_correction = best_suggestion.term
+        
+        # Heuristics to protect proper nouns:
+        if is_capitalized:
+            # 1. Reject if it changes the FIRST letter (e.g. "Xiuying" -> "Buying")
+            if best_correction and best_correction[0].lower() != core_word[0].lower():
+                return token
+            # 2. Reject if edit distance is > 1 for capitalized words (e.g. "Tencent" -> "Recent")
+            if best_suggestion.distance > 1:
+                return token
         
         # Restore case
         if is_upper:
             best_correction = best_correction.upper()
-        elif is_title:
+        elif is_capitalized:
             best_correction = best_correction.capitalize()
             
         return f"{prefix}{best_correction}{suffix}"

@@ -40,8 +40,9 @@ class RuleBasedCleaner:
         """Adds missing spaces after commas and periods."""
         # Add space after comma if followed by a letter
         text = re.sub(r',([a-zA-Z])', r', \1', text)
-        # Add space after period if followed by a letter
-        text = re.sub(r'\.([a-zA-Z])', r'. \1', text)
+        # Add space after period if followed by an uppercase letter
+        # This safely avoids breaking URLs (github.com), emails, and filenames
+        text = re.sub(r'\.([A-Z])', r'. \1', text)
         return text
 
     def repair_broken_lines(self, text: str) -> str:

@@ -28,6 +28,8 @@ from pipeline.chunker.text_splitter import chunk_directory, save_chunks
 from pipeline.embedder.bge_small_embedder import load_chunks, embed_chunks, build_faiss_index, save_index
 from pipeline.retriever.faiss_retriever import FAISSRetriever
 from evaluation.retrieval_eval import evaluate_retrieval
+from scipy import stats
+from codecarbon import EmissionsTracker
 
 
 # ── Config ────────────────────────────────────────────────────────────────────
@@ -135,7 +137,8 @@ def run_experiment(
     print(f"  Results: {name}")
     print(f"{'─'*40}")
     for metric, value in metrics.items():
-        print(f"  {metric:>10}: {value:.4f}")
+        if metric != "mrr_scores_list":
+            print(f"  {metric:>10}: {value:.4f}")
 
     return {
         "name": name,
@@ -163,7 +166,7 @@ def print_comparison_table(all_experiments: List[Dict[str, Any]]):
     all_metric_names = []
     for exp in all_experiments:
         for k in exp["metrics"]:
-            if k not in all_metric_names:
+            if k not in all_metric_names and k != "mrr_scores_list":
                 all_metric_names.append(k)
 
     # Header
@@ -201,41 +204,84 @@ if __name__ == "__main__":
                         help="Max QA pairs per domain (0 = all)")
     args = parser.parse_args()
 
-    print("NoiseClear-RAG — Baseline Experiment Runner")
-    print(f"Project root: {PROJECT_ROOT}\n")
+    tracker = EmissionsTracker(project_name="NoiRAG_Baseline")
+    tracker.start()
 
-    # Load QA pairs
-    print("Loading QA pairs...")
-    qa_pairs = load_qa_pairs(args.limit)
-    print(f"Total: {len(qa_pairs)} QA pairs\n")
+    try:
+        print("NoiseClear-RAG — Baseline Experiment Runner")
+        print(f"Project root: {PROJECT_ROOT}\n")
 
-    all_experiments = []
+        # Load QA pairs
+        print("Loading QA pairs...")
+        qa_pairs = load_qa_pairs(args.limit)
+        print(f"Total: {len(qa_pairs)} QA pairs\n")
 
-    # ── Experiment 1: Clean baseline ──────────────────────────────────────
-    print("▸ Running CLEAN baseline...")
-    clean_result = run_experiment("gt", GT_DIR, qa_pairs)
-    all_experiments.append(clean_result)
+        all_experiments = []
 
-    # ── Experiment 2+: Noisy baselines ────────────────────────────────────
-    if args.noisy:
-        types = [args.noise_type] if args.noise_type else ["semantic", "formatting"]
-        levels = [args.noise_level] if args.noise_level else [10, 25, 50, 75]
+        # ── Experiment 1: Clean baseline ──────────────────────────────────────
+        print("▸ Running CLEAN baseline...")
+        clean_result = run_experiment("gt", GT_DIR, qa_pairs)
+        all_experiments.append(clean_result)
 
-        for ntype in types:
-            for nlevel in levels:
-                noisy_name = f"{ntype}_{nlevel}"
-                noisy_dir = NOISY_DIR / noisy_name
+        # ── Experiment 2+: Noisy baselines ────────────────────────────────────
+        if args.noisy:
+            types = [args.noise_type] if args.noise_type else ["semantic", "formatting"]
+            levels = [args.noise_level] if args.noise_level else [10, 25, 50, 75]
 
-                if not noisy_dir.exists() or not any(noisy_dir.iterdir()):
-                    print(f"\n⚠️ Skipping {noisy_name} — no data in {noisy_dir}")
-                    print(f"   Run: python -m baseline.noise_injector --type {ntype} --level {nlevel}")
-                    continue
+            for ntype in types:
+                for nlevel in levels:
+                    noisy_name = f"{ntype}_{nlevel}"
+                    noisy_dir = NOISY_DIR / noisy_name
 
-                result = run_experiment(noisy_name, noisy_dir, qa_pairs)
-                all_experiments.append(result)
+                    if not noisy_dir.exists() or not any(noisy_dir.iterdir()):
+                        print(f"\n⚠️ Skipping {noisy_name} — no data in {noisy_dir}")
+                        print(f"   Run: python -m baseline.noise_injector --type {ntype} --level {nlevel}")
+                        continue
 
-    # ── Summary ───────────────────────────────────────────────────────────
-    print_comparison_table(all_experiments)
-    save_results(all_experiments)
+                    result = run_experiment(noisy_name, noisy_dir, qa_pairs)
+                    all_experiments.append(result)
 
-    print("\n🎉 Baseline experiments complete!")
+        # ── Summary ───────────────────────────────────────────────────────────
+        print_comparison_table(all_experiments)
+        
+        # ── Statistical Test ──────────────────────────────────────────────────
+        gt_exp = next((exp for exp in all_experiments if exp["name"] == "gt"), None)
+        if gt_exp and len(all_experiments) > 1:
+            print(f"\n{'='*60}")
+            print(f"  STATISTICAL SIGNIFICANCE TEST (Paired t-test on MRR)")
+            print(f"{'='*60}")
+            gt_mrr = gt_exp["metrics"].get("mrr_scores_list", [])
+            for exp in all_experiments:
+                if exp["name"] == "gt": continue
+                noisy_mrr = exp["metrics"].get("mrr_scores_list", [])
+                if gt_mrr and noisy_mrr and len(gt_mrr) == len(noisy_mrr):
+                    stat, p_value = stats.ttest_rel(gt_mrr, noisy_mrr)
+                    sig = "Significant Degradation" if p_value < 0.05 else "Not Significant"
+                    print(f"  GT vs {exp['name']:<15} | p-value: {p_value:.6f} [{sig}]")
+                    # Store statistical result in the dictionary to be saved in JSON
+                    exp["metrics"]["p_value_vs_gt"] = float(p_value)
+                    exp["metrics"]["is_significant_degradation"] = bool(p_value < 0.05)
+            print(f"{'='*60}")
+
+        # Remove raw list before saving
+        for exp in all_experiments:
+            if "mrr_scores_list" in exp["metrics"]:
+                del exp["metrics"]["mrr_scores_list"]
+
+        # Stop tracker and capture emissions so it can be saved in JSON
+        emissions = tracker.stop()
+        if emissions is not None:
+            print(f"\n🌱 Total Carbon Emissions: {emissions:.6f} kg CO2eq")
+            all_experiments.append({
+                "name": "sustainability",
+                "metrics": {"carbon_emissions_kg_co2eq": emissions},
+                "num_queries": 0
+            })
+        else:
+            print("\n🌱 Could not determine carbon emissions.")
+
+        save_results(all_experiments)
+
+        print("\n🎉 Baseline experiments complete!")
+    finally:
+        tracker.stop()

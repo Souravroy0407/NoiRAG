@@ -102,7 +102,14 @@ if __name__ == "__main__":
     # 1. Clean the Noisy Dataset
     if not args.skip_cleaning:
         cleaner = HybridCleaner(verbose=True)
+        cleaner.profiler.start()
         apply_preprocessing(noise_name, noisy_dir, cleaned_dir, cleaner)
+        cleaner.profiler.stop()
+        
+        # Print and save the cost & efficiency report
+        cleaner.profiler.print_report()
+        cost_report_path = RESULTS_DIR / f"cost_report_{noise_name}.json"
+        cleaner.profiler.save_report(cost_report_path)
     else:
         print(f"\n[1/4] Skipping Preprocessing. Using existing data at {cleaned_dir}")
         if not cleaned_dir.exists():

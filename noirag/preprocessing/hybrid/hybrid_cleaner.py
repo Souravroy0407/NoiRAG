@@ -5,6 +5,7 @@ cleaners based on the heuristic scores from the Quality Scorer.
 """
 import argparse
 import sys
+import time
 import json
 from typing import List, Dict, Any, Tuple
 
@@ -12,6 +13,7 @@ from noirag.preprocessing.hybrid.quality_scorer import QualityScorer
 from noirag.preprocessing.rule_based.cleaner import RuleBasedCleaner
 from noirag.preprocessing.statistical.spell_cleaner import StatisticalCleaner
 from noirag.preprocessing.hybrid.llm_cleaner import LLMCleaner
+from noirag.preprocessing.hybrid.cost_profiler import CostProfiler
 
 class HybridCleaner:
     def __init__(
@@ -37,6 +39,7 @@ class HybridCleaner:
         self.rule_cleaner = RuleBasedCleaner()
         self.stat_cleaner = StatisticalCleaner()
         self.llm_cleaner = LLMCleaner()
+        self.profiler = CostProfiler()
         
     def clean(self, text: str) -> Tuple[str, Dict[str, Any]]:
         """
@@ -45,7 +48,8 @@ class HybridCleaner:
         """
         if not text:
             return text, {}
-            
+        
+        t0 = time.perf_counter()
         scores = self.scorer.score(text)
         
         # Determine Routing
@@ -77,6 +81,9 @@ class HybridCleaner:
                   f"Garbage={scores['garbage_density']:.3f}"
                   f" | Routing: {applied_cleaners}")
             
+        elapsed = time.perf_counter() - t0
+        self.profiler.record(text, applied_cleaners, elapsed)
+        
         metadata = {
             "original_scores": scores,
             "applied_cleaners": applied_cleaners
