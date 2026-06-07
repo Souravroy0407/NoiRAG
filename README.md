@@ -16,7 +16,7 @@ Real-world RAG (Retrieval-Augmented Generation) systems often fail when processi
 **Key results across 8 evaluated experiments:**
 - ✅ **p-value ≥ 0.05** for all NoiRAG Cleaned results — statistically indistinguishable from perfect data
 - 💰 **99.6% of API calls avoided** — $336+ saved vs. GPT-4o equivalent
-- ⚡ **All processing 100% local and offline** — zero external dependencies
+- ⚡ **Offline-first architecture** — runs 100% local (via Ollama) or via hybrid cloud backends (like Groq)
 - 🌱 **< 0.01 kg CO₂eq** carbon footprint per full pipeline run
 
 ---

@@ -328,6 +328,7 @@ page = st.sidebar.radio("Navigate", [
     "📊 Benchmarks",
     "🔍 Text Comparison",
     "⚙️ Architecture",
+    "👥 About",
 ])
 
 
@@ -357,7 +358,7 @@ if page == "🏠 Overview":
     with c3:
         st.markdown('<div class="metric-card"><div class="metric-value">3</div><div class="metric-label">Cleaning Strategies</div><div class="metric-delta">↑ Rule · Stat · LLM</div></div>', unsafe_allow_html=True)
     with c4:
-        st.markdown('<div class="metric-card"><div class="metric-value">$0</div><div class="metric-label">API Costs</div><div class="metric-delta">↑ 100% local & offline</div></div>', unsafe_allow_html=True)
+        st.markdown('<div class="metric-card"><div class="metric-value">$0</div><div class="metric-label">API Costs</div><div class="metric-delta">↑ Offline-First Design</div></div>', unsafe_allow_html=True)
 
     st.markdown("<br>", unsafe_allow_html=True)
 
@@ -384,7 +385,7 @@ if page == "🏠 Overview":
         - **Surgical Precision:** Recovered P@1 & MRR destroyed by noise across all 8 experiments.
         - **Cost Avoidance:** Fixed **99.9%** of corrupted text with free local algorithms
           (Regex & SymSpell), avoiding hundreds of dollars in LLM API costs.
-        - **Privacy & Speed:** 100% offline — millions of tokens processed in under 2 minutes.
+        - **Privacy & Speed:** Offline-first architecture — 99%+ of processing runs locally in milliseconds.
         - **Statistical Validity:** p-value ≥ 0.05 for all cleaned results ✅
         """)
 
@@ -717,8 +718,8 @@ elif page == "💰 Cost Report":
                             st.metric("🌱 Carbon Emissions", f"{carbon:.6f} kg CO2eq")
 
             st.markdown("---")
-            st.success("✅ Runs fully offline — zero external API dependencies")
-            st.success("✅ No rate limits, no API keys, no data leaves your machine")
+            st.success("✅ Offline-First Architecture — 99%+ of workload runs fully local and free")
+            st.success("✅ Multi-backend support — runs 100% offline via local Ollama or high-speed via Groq API")
 
 
 
@@ -1100,7 +1101,255 @@ elif page == "⚙️ Architecture":
             st.code(cleaned, language="text")
 
 
+# ──────────────────────────────────────────────────────────────────────────────
+# PAGE: ABOUT
+# ══════════════════════════════════════════════════════════════════════════════
+elif page == "👥 About":
+
+    # ── Hero ──
+    st.markdown("""
+    <div class="hero-banner">
+        <span class="hero-badge">👥 About This Project</span>
+        <div class="hero-title">🧹 About NoiRAG</div>
+        <p class="hero-subtitle">
+            A research project exploring intelligent, zero-cost document preprocessing
+            for Retrieval-Augmented Generation systems — built to make RAG pipelines
+            robust against real-world noise without spending a single dollar on APIs.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # ── Project Story ──
+    st.markdown('<div class="section-hdr">📚 The Problem We Solved</div>', unsafe_allow_html=True)
+    c1, c2 = st.columns(2)
+    with c1:
+        st.markdown("""
+        Real-world documents — scanned PDFs, OCR outputs, legacy reports — are full of noise:
+        broken lines, garbage characters, misspellings, and corrupted words.
+        When ingested into a RAG pipeline, this noise **destroys retrieval accuracy**.
+
+        Traditional solutions either ignore the problem, or throw expensive cloud LLMs
+        at every document — costing hundreds of dollars and leaking private data.
+
+        **NoiRAG takes a different approach:** a surgical, tiered triage system that
+        fixes 99%+ of noise with free local algorithms, calling an LLM only as a last resort.
+        """)
+    with c2:
+        st.markdown("""
+        <div style="background:rgba(99,102,241,0.06);border:1px solid rgba(99,102,241,0.2);
+            border-radius:14px;padding:20px 22px;">
+            <div style="font-size:0.8rem;color:#64748b;text-transform:uppercase;
+                letter-spacing:0.06em;margin-bottom:12px;">Key achievements</div>
+            <div style="display:flex;flex-direction:column;gap:10px;">
+                <div style="display:flex;gap:10px;align-items:center;">
+                    <span style="font-size:1.2rem;">✅</span>
+                    <span style="color:#c7d2fe;font-size:0.9rem;">p ≥ 0.05 on all 8 experiments — statistically indistinguishable from perfect data</span>
+                </div>
+                <div style="display:flex;gap:10px;align-items:center;">
+                    <span style="font-size:1.2rem;">💰</span>
+                    <span style="color:#c7d2fe;font-size:0.9rem;">$336+ saved vs GPT-4o equivalent cost</span>
+                </div>
+                <div style="display:flex;gap:10px;align-items:center;">
+                    <span style="font-size:1.2rem;">🔒</span>
+                    <span style="color:#c7d2fe;font-size:0.9rem;">100% offline — no data leaves the machine</span>
+                </div>
+                <div style="display:flex;gap:10px;align-items:center;">
+                    <span style="font-size:1.2rem;">⚡</span>
+                    <span style="color:#c7d2fe;font-size:0.9rem;">Full corpus processed in under 2 minutes</span>
+                </div>
+                <div style="display:flex;gap:10px;align-items:center;">
+                    <span style="font-size:1.2rem;">🌱</span>
+                    <span style="color:#c7d2fe;font-size:0.9rem;">&lt; 0.01 kg CO₂eq carbon footprint per run</span>
+                </div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    st.markdown("---")
+
+    # ── Team ──
+    st.markdown('<div class="section-hdr">👥 The Team</div>', unsafe_allow_html=True)
+    t1, t2, t3 = st.columns(3)
+    team = [
+        {
+            "name": "Sourav Roy",
+            "role": "M.Sc. Data Science & Analytics",
+            "tag": "Developer",
+            "emoji": "🧑‍💻",
+            "github": "https://github.com/Souravroy0407",
+            "color": "#818cf8",
+            "border": "rgba(99,102,241,0.3)",
+            "bg": "rgba(99,102,241,0.07)",
+            "tag_color": "#818cf8",
+            "tag_bg": "rgba(99,102,241,0.15)",
+        },
+        {
+            "name": "Shreya Bag",
+            "role": "M.Sc. Data Science & Analytics",
+            "tag": "Developer",
+            "emoji": "🧑‍🔬",
+            "github": "https://github.com/shreyabag028",
+            "color": "#c084fc",
+            "border": "rgba(168,85,247,0.3)",
+            "bg": "rgba(168,85,247,0.07)",
+            "tag_color": "#c084fc",
+            "tag_bg": "rgba(168,85,247,0.15)",
+        },
+        {
+            "name": "Ms. Madhurima Paul",
+            "role": "Project Mentor",
+            "tag": "Mentor",
+            "emoji": "👩‍🏫",
+            "github": "https://github.com/Souravroy0407/NoiRAG",
+            "color": "#34d399",
+            "border": "rgba(52,211,153,0.3)",
+            "bg": "rgba(52,211,153,0.07)",
+            "tag_color": "#34d399",
+            "tag_bg": "rgba(52,211,153,0.15)",
+        },
+    ]
+    for col, member in zip([t1, t2, t3], team):
+        with col:
+            github_btn = (
+                f'<a href="{member["github"]}" target="_blank" style="'
+                f'display:inline-block;background:rgba(255,255,255,0.06);'
+                f'border:1px solid rgba(255,255,255,0.12);border-radius:20px;'
+                f'padding:5px 16px;font-size:0.78rem;color:{member["color"]};'
+                f'text-decoration:none;font-weight:600;">GitHub ↗</a>'
+                if member["name"] != "Ms. Madhurima Paul"
+                else f'<span style="display:inline-block;background:rgba(255,255,255,0.03);'
+                     f'border:1px solid rgba(255,255,255,0.08);border-radius:20px;'
+                     f'padding:5px 16px;font-size:0.78rem;color:#64748b;">Mentor</span>'
+            )
+            st.markdown(f"""
+            <div style="background:{member['bg']};border:1px solid {member['border']};
+                border-radius:16px;padding:28px 18px 22px;text-align:center;
+                transition:transform 0.2s;">
+                <div style="font-size:3rem;margin-bottom:10px;">{member['emoji']}</div>
+                <div style="font-size:1.05rem;font-weight:700;color:#e2e8f0;
+                    margin-bottom:4px;">{member['name']}</div>
+                <div style="display:inline-block;background:{member['tag_bg']};
+                    border:1px solid {member['border']};border-radius:12px;
+                    padding:2px 10px;font-size:0.7rem;font-weight:700;
+                    color:{member['tag_color']};letter-spacing:0.05em;
+                    text-transform:uppercase;margin-bottom:16px;">{member['tag']}</div>
+                <br>
+                {github_btn}
+            </div>
+            """, unsafe_allow_html=True)
+
+    st.markdown("---")
+
+    # ── Tech Stack ──
+    st.markdown('<div class="section-hdr">🛠️ Tech Stack</div>', unsafe_allow_html=True)
+    tech = [
+        ("🐍", "Python 3.10+",     "Core language",           "#3b82f6"),
+        ("🧠", "FAISS",            "Vector similarity search", "#8b5cf6"),
+        ("📦", "BGE-Small-EN",    "Text embeddings",          "#06b6d4"),
+        ("📊", "Streamlit",       "Interactive dashboard",    "#ef4444"),
+        ("🔤", "SymSpellPy",     "Statistical spell check",  "#10b981"),
+        ("🤖", "Groq API",        "LLM fallback cleaner",     "#f59e0b"),
+        ("📉", "SciPy",           "Statistical significance", "#6366f1"),
+        ("🌱", "CodeCarbon",     "Emissions tracking",       "#22c55e"),
+    ]
+    rows = [tech[:4], tech[4:]]
+    for row in rows:
+        cols = st.columns(4)
+        for col, (icon, name, desc, color) in zip(cols, row):
+            with col:
+                st.markdown(f"""
+                <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);
+                    border-radius:12px;padding:14px 12px;text-align:center;margin:4px 0;
+                    transition:transform 0.2s;">
+                    <div style="font-size:1.6rem;margin-bottom:6px;">{icon}</div>
+                    <div style="font-size:0.88rem;font-weight:700;
+                        color:{color};margin-bottom:3px;">{name}</div>
+                    <div style="font-size:0.74rem;color:#64748b;">{desc}</div>
+                </div>
+                """, unsafe_allow_html=True)
+        st.markdown("")
+
+    st.markdown("---")
+
+    # ── Contact & Links ──
+    st.markdown('<div class="section-hdr">📨 Contact & Links</div>', unsafe_allow_html=True)
+    lc, rc = st.columns(2)
+    with lc:
+        st.markdown("""
+        <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);
+            border-radius:14px;padding:22px 20px;display:flex;flex-direction:column;gap:14px;">
+            <a href="https://github.com/Souravroy0407/NoiRAG" target="_blank" style="
+                display:flex;align-items:center;gap:12px;text-decoration:none;
+                padding:12px 16px;border-radius:10px;
+                background:rgba(99,102,241,0.08);border:1px solid rgba(99,102,241,0.2);">
+                <span style="font-size:1.4rem;">&#128279;</span>
+                <div>
+                    <div style="color:#818cf8;font-weight:700;font-size:0.9rem;">GitHub Repository</div>
+                    <div style="color:#64748b;font-size:0.78rem;">github.com/Souravroy0407/NoiRAG</div>
+                </div>
+            </a>
+            <a href="https://github.com/Souravroy0407" target="_blank" style="
+                display:flex;align-items:center;gap:12px;text-decoration:none;
+                padding:12px 16px;border-radius:10px;
+                background:rgba(168,85,247,0.08);border:1px solid rgba(168,85,247,0.2);">
+                <span style="font-size:1.4rem;">🧑‍💻</span>
+                <div>
+                    <div style="color:#c084fc;font-weight:700;font-size:0.9rem;">Sourav Roy</div>
+                    <div style="color:#64748b;font-size:0.78rem;">github.com/Souravroy0407</div>
+                </div>
+            </a>
+            <a href="https://github.com/shreyabag028" target="_blank" style="
+                display:flex;align-items:center;gap:12px;text-decoration:none;
+                padding:12px 16px;border-radius:10px;
+                background:rgba(52,211,153,0.08);border:1px solid rgba(52,211,153,0.2);">
+                <span style="font-size:1.4rem;">🧑‍🔬</span>
+                <div>
+                    <div style="color:#34d399;font-weight:700;font-size:0.9rem;">Shreya Bag</div>
+                    <div style="color:#64748b;font-size:0.78rem;">github.com/shreyabag028</div>
+                </div>
+            </a>
+        </div>
+        """, unsafe_allow_html=True)
+    with rc:
+        st.markdown("""
+        <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);
+            border-radius:14px;padding:22px 20px;">
+            <div style="font-size:0.8rem;color:#64748b;text-transform:uppercase;
+                letter-spacing:0.06em;margin-bottom:14px;">Project Info</div>
+            <div style="display:flex;flex-direction:column;gap:10px;">
+                <div style="display:flex;justify-content:space-between;padding:8px 0;
+                    border-bottom:1px solid rgba(255,255,255,0.05);">
+                    <span style="color:#94a3b8;font-size:0.85rem;">Version</span>
+                    <span style="color:#e2e8f0;font-weight:600;font-size:0.85rem;">v1.0 — Research</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;padding:8px 0;
+                    border-bottom:1px solid rgba(255,255,255,0.05);">
+                    <span style="color:#94a3b8;font-size:0.85rem;">License</span>
+                    <span style="color:#e2e8f0;font-weight:600;font-size:0.85rem;">MIT</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;padding:8px 0;
+                    border-bottom:1px solid rgba(255,255,255,0.05);">
+                    <span style="color:#94a3b8;font-size:0.85rem;">Experiments</span>
+                    <span style="color:#4ade80;font-weight:600;font-size:0.85rem;">8 / 8 Complete &#x2705;</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;padding:8px 0;
+                    border-bottom:1px solid rgba(255,255,255,0.05);">
+                    <span style="color:#94a3b8;font-size:0.85rem;">Domains</span>
+                    <span style="color:#e2e8f0;font-weight:600;font-size:0.85rem;">7 diverse domains</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;padding:8px 0;">
+                    <span style="color:#94a3b8;font-size:0.85rem;">API Cost</span>
+                    <span style="color:#34d399;font-weight:700;font-size:0.85rem;">$0.00 &#x1F4B0;</span>
+                </div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    st.markdown("")
+    st.markdown('<div class="insight-box"><p>💬 <b>Want to collaborate or have questions?</b> Open an issue or start a discussion on the <a href="https://github.com/Souravroy0407/NoiRAG" style="color:#818cf8;">GitHub repository</a>. We welcome contributions, bug reports, and ideas for new noise types or cleaning strategies.</p></div>', unsafe_allow_html=True)
+
+
 # ── Sidebar Footer ──
 st.sidebar.markdown("---")
 st.sidebar.markdown("Built by **Team NoiRAG**")
-st.sidebar.markdown("[GitHub](https://github.com/shreyabag028/NoiRAG)")
+st.sidebar.markdown("[GitHub](https://github.com/Souravroy0407/NoiRAG)")
