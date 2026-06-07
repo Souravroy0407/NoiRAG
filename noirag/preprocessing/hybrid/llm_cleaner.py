@@ -14,9 +14,9 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # ╔══════════════════════════════════════════════════════════════╗
-# ║  SWITCH BACKEND HERE — Change "ollama" to "openai"         ║
+# ║  SWITCH BACKEND HERE — Change "ollama" to "openai" or "groq" ║
 # ╚══════════════════════════════════════════════════════════════╝
-BACKEND = "ollama"
+BACKEND = "groq"
 # ════════════════════════════════════════════════════════════════
 
 
@@ -31,6 +31,10 @@ class LLMCleaner:
         "openai": {
             "model": "gpt-4o-mini",
             "url": "https://api.openai.com/v1/chat/completions",
+        },
+        "groq": {
+            "model": "llama-3.1-8b-instant",
+            "url": "https://api.groq.com/openai/v1/chat/completions",
         },
     }
 
@@ -47,10 +51,16 @@ class LLMCleaner:
         self.model = config["model"]
         self.api_url = config["url"]
 
-        # Only needed for OpenAI
-        self.api_key = os.getenv("OPENAI_API_KEY") if backend == "openai" else None
-        if backend == "openai" and not self.api_key:
-            print("⚠ WARNING: OPENAI_API_KEY not found in .env file!")
+        # Only needed for OpenAI or Groq
+        self.api_key = None
+        if backend == "openai":
+            self.api_key = os.getenv("OPENAI_API_KEY")
+            if not self.api_key:
+                print("⚠ WARNING: OPENAI_API_KEY not found in .env file!")
+        elif backend == "groq":
+            self.api_key = os.getenv("GROQ_API_KEY")
+            if not self.api_key:
+                print("⚠ WARNING: GROQ_API_KEY not found in .env file!")
 
         self.system_prompt = (
             "You are a strict, automated OCR-repair engine. Your ONLY purpose is to fix OCR errors, typos, "
@@ -72,8 +82,8 @@ class LLMCleaner:
         try:
             if self.backend == "ollama":
                 return self._clean_ollama(text)
-            else:
-                return self._clean_openai(text)
+            elif self.backend in ["openai", "groq"]:
+                return self._clean_openai(text) # Groq uses the exact same OpenAI API structure
         except requests.exceptions.RequestException as e:
             print(f"LLM Cleaner [{self.backend}] connection failed: {e}")
             return text
@@ -88,15 +98,16 @@ class LLMCleaner:
             "stream": False,
             "options": {"temperature": 0.0}
         }
-        response = requests.post(self.api_url, json=payload, timeout=300)
+        response = requests.post(self.api_url, json=payload, timeout=1200)
         if response.status_code == 200:
             return response.json()['message']['content'].strip()
         else:
             print(f"Ollama Error: {response.status_code} - {response.text}")
             return text
 
-    # ── OpenAI Backend ───────────────────────────────────────
+    # ── OpenAI/Groq Backend ───────────────────────────────────────
     def _clean_openai(self, text: str) -> str:
+        import time
         headers = {
             "Authorization": f"Bearer {self.api_key}",
             "Content-Type": "application/json"
@@ -110,9 +121,18 @@ class LLMCleaner:
             "temperature": 0.0,
             "max_tokens": 2048
         }
-        response = requests.post(self.api_url, headers=headers, json=payload, timeout=120)
-        if response.status_code == 200:
-            return response.json()['choices'][0]['message']['content'].strip()
-        else:
-            print(f"OpenAI Error: {response.status_code} - {response.text}")
-            return text
+        
+        max_retries = 5
+        for attempt in range(max_retries):
+            response = requests.post(self.api_url, headers=headers, json=payload, timeout=120)
+            if response.status_code == 200:
+                return response.json()['choices'][0]['message']['content'].strip()
+            elif response.status_code == 429:
+                print(f"API Error 429: Rate limit reached. Sleeping for 35 seconds (Attempt {attempt+1}/{max_retries})...")
+                time.sleep(35)
+            else:
+                print(f"API Error: {response.status_code} - {response.text}")
+                return text
+                
+        print("Max retries reached. Returning original uncleaned text.")
+        return text

@@ -71,8 +71,11 @@ class RuleBasedCleaner:
             curr_first_char = curr_line.lstrip()[0] if curr_line.lstrip() else ''
             
             if prev_last_char and prev_last_char not in '.!?:"\'' and curr_first_char and curr_first_char.islower():
-                # Merge them
-                merged[-1] = prev_line + curr_line
+                # Merge them with a space to prevent words from clumping together
+                if prev_line.endswith(' ') or curr_line.startswith(' '):
+                    merged[-1] = prev_line + curr_line
+                else:
+                    merged[-1] = prev_line + ' ' + curr_line
             else:
                 merged.append(curr_line)
             

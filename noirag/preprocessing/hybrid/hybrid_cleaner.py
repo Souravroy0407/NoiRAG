@@ -20,7 +20,7 @@ class HybridCleaner:
         self, 
         formatting_threshold: float = 0.05,
         semantic_threshold: float = 0.10,
-        llm_threshold: float = 0.60,
+        llm_threshold: float = 0.75,
         verbose: bool = False
     ):
         """
