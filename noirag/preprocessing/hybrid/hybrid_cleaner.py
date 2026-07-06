@@ -21,6 +21,8 @@ class HybridCleaner:
         formatting_threshold: float = 0.05,
         semantic_threshold: float = 0.15,
         llm_threshold: float = 0.75,
+        llm_backend: str = "groq",
+        api_key: str = None,
         verbose: bool = False
     ):
         """
@@ -28,6 +30,8 @@ class HybridCleaner:
             formatting_threshold: Score above which Rule-Based cleaner is applied.
             semantic_threshold: OOV ratio above which Statistical cleaner is applied.
             llm_threshold: Overall score above which the heavy LLM cleaner is executed.
+            llm_backend: Backend to use for LLMCleaner ("groq", "ollama", or "openai")
+            api_key: Optional API key for LLMCleaner
             verbose: If True, prints routing decisions during execution.
         """
         self.formatting_threshold = formatting_threshold
@@ -38,7 +42,7 @@ class HybridCleaner:
         self.scorer = QualityScorer()
         self.rule_cleaner = RuleBasedCleaner()
         self.stat_cleaner = StatisticalCleaner()
-        self.llm_cleaner = LLMCleaner()
+        self.llm_cleaner = LLMCleaner(backend=llm_backend, api_key=api_key)
         self.profiler = CostProfiler()
         
     def clean(self, text: str) -> Tuple[str, Dict[str, Any]]:

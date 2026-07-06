@@ -38,29 +38,27 @@ class LLMCleaner:
         },
     }
 
-    def __init__(self, backend: str = BACKEND):
+    def __init__(self, backend: str = BACKEND, api_key: str = None):
         """
         Args:
-            backend: "ollama" or "openai"
+            backend: "ollama", "openai", or "groq"
+            api_key: Optional API key. If not provided, reads from environment.
         """
         if backend not in self.BACKENDS:
-            raise ValueError(f"Unknown backend '{backend}'. Choose 'ollama' or 'openai'.")
+            raise ValueError(f"Unknown backend '{backend}'. Choose from {list(self.BACKENDS.keys())}.")
 
         self.backend = backend
         config = self.BACKENDS[backend]
         self.model = config["model"]
         self.api_url = config["url"]
 
-        # Only needed for OpenAI or Groq
-        self.api_key = None
-        if backend == "openai":
-            self.api_key = os.getenv("OPENAI_API_KEY")
-            if not self.api_key:
-                print("[WARNING] OPENAI_API_KEY not found in .env file!")
-        elif backend == "groq":
-            self.api_key = os.getenv("GROQ_API_KEY")
-            if not self.api_key:
-                print("[WARNING] GROQ_API_KEY not found in .env file!")
+        # Load API Key from argument or environment variables
+        self.api_key = api_key
+        if not self.api_key:
+            if backend == "openai":
+                self.api_key = os.getenv("OPENAI_API_KEY")
+            elif backend == "groq":
+                self.api_key = os.getenv("GROQ_API_KEY")
 
         self.system_prompt = (
             "You are a strict, automated OCR-repair engine. Your ONLY purpose is to fix OCR errors, typos, "
@@ -71,8 +69,6 @@ class LLMCleaner:
             "3. DO NOT change the meaning, tone, or restructure paragraphs unnecessarily. "
             "4. Leave valid proper nouns and acronyms completely untouched."
         )
-
-        print(f"LLM Cleaner initialized -> Backend: {self.backend} | Model: {self.model}")
 
     def clean(self, text: str) -> str:
         """Send the text to the active LLM backend for repair."""
@@ -108,6 +104,10 @@ class LLMCleaner:
     # -- OpenAI/Groq Backend ---------------------------------------
     def _clean_openai(self, text: str) -> str:
         import time
+        if not self.api_key:
+            print(f"[WARNING] {self.backend.upper()}_API_KEY was not found! Skipping LLM cleaner and falling back.")
+            return text
+            
         headers = {
             "Authorization": f"Bearer {self.api_key}",
             "Content-Type": "application/json"
