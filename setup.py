@@ -1,9 +1,14 @@
 from setuptools import setup, find_packages
 
+with open("README.md", "r", encoding="utf-8") as fh:
+    long_description = fh.read()
+
 setup(
     name="noirag",
-    version="1.0.0",
+    version="1.0.1",
     description="Noise-Aware Retrieval-Augmented Generation preprocessing engine",
+    long_description=long_description,
+    long_description_content_type="text/markdown",
     author="Sourav Roy & Team NoiRAG",
     packages=find_packages(include=["noirag", "noirag.*"]),
     install_requires=[
