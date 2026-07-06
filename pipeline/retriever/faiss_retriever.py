@@ -14,10 +14,10 @@ from typing import List, Dict, Any
 from sentence_transformers import SentenceTransformer
 
 
-# ── Config ────────────────────────────────────────────────────────────────────
+# -- Config --------------------------------------------------------------------
 MODEL_NAME = "BAAI/bge-small-en-v1.5"
 TOP_K      = 5  # number of chunks to retrieve per query
-# ─────────────────────────────────────────────────────────────────────────────
+# -----------------------------------------------------------------------------
 
 
 class FAISSRetriever:
@@ -32,14 +32,14 @@ class FAISSRetriever:
         # Load FAISS index
         print(f"Loading FAISS index from {index_path}...")
         self.index = faiss.read_index(str(index_path))
-        print(f"  Index loaded — {self.index.ntotal} vectors")
+        print(f"  Index loaded -- {self.index.ntotal} vectors")
 
         # Load metadata
         with open(metadata_path, "r", encoding="utf-8") as f:
             self.metadata = json.load(f)
-        print(f"  Metadata loaded — {len(self.metadata)} entries")
+        print(f"  Metadata loaded -- {len(self.metadata)} entries")
 
-        # Load BGE-small model (same as embedder — 384-dim)
+        # Load BGE-small model (same as embedder -- 384-dim)
         print(f"Loading model: {MODEL_NAME}...")
         self.model = SentenceTransformer(MODEL_NAME)
         print("  Model ready!")
@@ -99,7 +99,7 @@ def load_chunk_text(
     return ""
 
 
-# ── CLI (quick test) ──────────────────────────────────────────────────────────
+# -- CLI (quick test) ----------------------------------------------------------
 if __name__ == "__main__":
     import argparse
 

@@ -83,7 +83,7 @@ class StatisticalCleaner:
         suggestions = self.sym_spell.lookup(
             core_word.lower(), 
             Verbosity.TOP,          
-            max_edit_distance=2     # Reduced from 3 to prevent aggressive butchering
+            max_edit_distance=1     # Conservative: only fix 1-char errors to prevent butchering proper nouns
         )
         
         if not suggestions:
@@ -92,6 +92,12 @@ class StatisticalCleaner:
         best_suggestion = suggestions[0]
         best_correction = best_suggestion.term
         
+        # SAFETY: reject if the correction is the same length or longer 
+        # AND edit distance is > 0 but correction frequency is low
+        # This prevents rare dictionary words from replacing valid proper nouns
+        if best_suggestion.distance > 0 and best_suggestion.count < 1000:
+            return token
+        
         # Heuristics to protect proper nouns:
         if is_capitalized:
             # 1. Reject if it changes the FIRST letter (e.g. "Xiuying" -> "Buying")
@@ -99,6 +105,11 @@ class StatisticalCleaner:
                 return token
             # 2. Reject if edit distance is > 1 for capitalized words (e.g. "Tencent" -> "Recent")
             if best_suggestion.distance > 1:
+                return token
+            # 3. Only correct capitalized words if they are extremely common English words,
+            # or if the original word has no standard vowels (highly likely to be an OCR typo like "Yrk")
+            has_standard_vowels = any(c in "aeiou" for c in core_word.lower())
+            if best_suggestion.count < 10000000 and has_standard_vowels:
                 return token
         
         # Restore case

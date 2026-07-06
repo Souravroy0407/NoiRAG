@@ -2,7 +2,7 @@
 pipeline/embedder/bge_small_embedder.py
 
 Loads chunks from a JSON file, embeds them using BAAI/bge-small-en-v1.5
-(runs locally via sentence-transformers — no API key needed),
+(runs locally via sentence-transformers -- no API key needed),
 and saves a FAISS index + metadata file for retrieval.
 
 Inputs:  data/chunks/gt_chunks.json
@@ -20,11 +20,11 @@ from typing import List, Dict, Any
 from sentence_transformers import SentenceTransformer
 
 
-# ── Config ────────────────────────────────────────────────────────────────────
+# -- Config --------------------------------------------------------------------
 MODEL_NAME = "BAAI/bge-small-en-v1.5"
-BATCH_SIZE = 64         # Local model — can handle larger batches
+BATCH_SIZE = 64         # Local model -- can handle larger batches
 EMBED_DIM  = 384        # bge-small-en-v1.5 output dimension
-# ─────────────────────────────────────────────────────────────────────────────
+# -----------------------------------------------------------------------------
 
 
 def load_chunks(chunks_path: str | Path) -> List[Dict[str, Any]]:
@@ -70,7 +70,7 @@ def embed_chunks(
         )
         all_embeddings.append(batch_emb)
 
-        # ── Live progress ─────────────────────────────────────────
+        # -- Live progress -----------------------------------------
         done = min(i + batch_size, total)
         pct = done / total * 100
         elapsed = time.time() - start_time
@@ -79,7 +79,7 @@ def embed_chunks(
 
         bar_len = 30
         filled = int(bar_len * done // total)
-        bar = "█" * filled + "░" * (bar_len - filled)
+        bar = "#" * filled + "-" * (bar_len - filled)
 
         sys.stdout.write(
             f"\r  [{bar}] {done:,}/{total:,} chunks "
@@ -105,7 +105,7 @@ def build_faiss_index(embeddings: np.ndarray) -> faiss.Index:
     print("Building FAISS index...")
     index = faiss.IndexFlatIP(EMBED_DIM)
     index.add(embeddings)
-    print(f"FAISS index built — {index.ntotal} vectors")
+    print(f"FAISS index built -- {index.ntotal} vectors")
     return index
 
 
@@ -122,7 +122,7 @@ def save_index(
     # Save FAISS index
     index_path = output_dir / f"{name}.faiss"
     faiss.write_index(index, str(index_path))
-    print(f"Saved FAISS index → {index_path}")
+    print(f"Saved FAISS index -> {index_path}")
 
     # Save metadata (one entry per vector, same order as index)
     metadata = [
@@ -132,15 +132,15 @@ def save_index(
     meta_path = output_dir / f"{name}_metadata.json"
     with open(meta_path, "w", encoding="utf-8") as f:
         json.dump(metadata, f, ensure_ascii=False, indent=2)
-    print(f"Saved metadata     → {meta_path}")
+    print(f"Saved metadata     -> {meta_path}")
 
 
-# ── CLI ───────────────────────────────────────────────────────────────────────
+# -- CLI -----------------------------------------------------------------------
 if __name__ == "__main__":
     # Auto-resolve project root (two levels up from this file)
     PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 
-    # Default paths — just run: python bge_small_embedder.py
+    # Default paths -- just run: python bge_small_embedder.py
     CHUNKS_FILE = PROJECT_ROOT / "data" / "chunks" / "gt_chunks.json"
     OUTPUT_DIR  = PROJECT_ROOT / "data" / "index"
     NAME        = "gt"
@@ -155,7 +155,7 @@ if __name__ == "__main__":
     index      = build_faiss_index(embeddings)
     save_index(index, chunks, OUTPUT_DIR, NAME)
 
-    print(f"\n✅ Done! Files saved:")
+    print(f"\n[OK] Done! Files saved:")
     print(f"  {OUTPUT_DIR / f'{NAME}.faiss'}")
     print(f"  {OUTPUT_DIR / f'{NAME}_metadata.json'}")
 

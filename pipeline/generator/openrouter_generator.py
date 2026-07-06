@@ -20,13 +20,13 @@ from dotenv import load_dotenv
 load_dotenv(Path(__file__).resolve().parent.parent.parent / ".env")
 
 
-# ── Config ────────────────────────────────────────────────────────────────────
+# -- Config --------------------------------------------------------------------
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY", "")
 BASE_URL           = "https://openrouter.ai/api/v1/chat/completions"
 MODEL              = "meta-llama/llama-3-8b-instruct"
 MAX_TOKENS         = 512
 TEMPERATURE        = 0.1   # low = more factual
-# ─────────────────────────────────────────────────────────────────────────────
+# -----------------------------------------------------------------------------
 
 
 SYSTEM_PROMPT = (
@@ -108,7 +108,7 @@ def generate(
     }
 
 
-# ── CLI (quick test) ──────────────────────────────────────────────────────────
+# -- CLI (quick test) ----------------------------------------------------------
 if __name__ == "__main__":
     import argparse
 
@@ -136,6 +136,6 @@ if __name__ == "__main__":
     )
 
     print(f"Answer: {result['answer']}")
-    print(f"\nTokens — prompt: {result['prompt_tokens']}, "
+    print(f"\nTokens -- prompt: {result['prompt_tokens']}, "
           f"completion: {result['completion_tokens']}, "
           f"total: {result['total_tokens']}")

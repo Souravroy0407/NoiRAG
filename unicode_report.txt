@@ -1,0 +1,17 @@
+.\main.py:1190
+.\baseline\noise_injector.py:258
+.\baseline\noise_injector.py:261
+.\baseline\noise_injector.py:289
+.\baseline\noise_injector.py:293
+.\baseline\run_baseline.py:211
+.\noirag\preprocessing\hybrid\llm_cleaner.py:131
+.\pipeline\chunker\text_splitter.py:102
+.\pipeline\chunker\text_splitter.py:105
+.\pipeline\chunker\text_splitter.py:117
+.\pipeline\embedder\bge_small_embedder.py:108
+.\pipeline\embedder\bge_small_embedder.py:125
+.\pipeline\embedder\bge_small_embedder.py:135
+.\pipeline\embedder\bge_small_embedder.py:158
+.\pipeline\generator\openrouter_generator.py:139
+.\pipeline\retriever\faiss_retriever.py:35
+.\pipeline\retriever\faiss_retriever.py:40

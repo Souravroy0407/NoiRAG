@@ -17,7 +17,7 @@ def test_clean_text_bypass(cleaner):
     assert metadata["applied_cleaners"] == []
 
 def test_routes_formatting_only(cleaner):
-    text = "Here is some text • with garbage ■ in it [...] and ==="
+    text = "Here is some text • with garbage ■ in it [...] and ===. This additional text is long enough to prevent the content preservation guard from reverting the cleaning process."
     cleaned_text, metadata = cleaner.clean(text)
     
     assert "rule_based" in metadata["applied_cleaners"]
@@ -34,7 +34,7 @@ def test_routes_semantic_only(cleaner):
     assert "computer" in cleaned_text.lower() or "computers" in cleaned_text.lower()
     
 def test_routes_both(cleaner):
-    text = "The computars ran teh t3st bdy. • with garbage ■ in it ==="
+    text = "The computars ran teh t3st bdy. • with garbage ■ in it ===. The systemm will fail to correctt unless we keep oov high."
     cleaned_text, metadata = cleaner.clean(text)
     
     # Needs to trigger both thresholds

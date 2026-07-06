@@ -16,7 +16,7 @@ Real-world RAG (Retrieval-Augmented Generation) systems often fail when processi
     *   **Purpose:** Storage for datasets. Holds the `ground_truth` (perfect data), `noisy` (corrupted data), and `cleaned` (repaired by NoiRAG) JSONs, as well as the `.faiss` vector indices.
 *   **`noirag/preprocessing/`** 
     *   **Purpose:** The core NoiRAG engine containing Rule-Based, Statistical, and Hybrid orchestration logic.
-*   **`noirag/pipeline/`** 
+*   **`pipeline/`** 
     *   **Purpose:** The standard RAG retrieval implementation utilizing BGE-Small and FAISS.
 *   **`noirag/run_noirag.py`** 
     *   **Purpose:** The master experiment runner that executes both preprocessing and retrieval evaluation automatically.

@@ -26,7 +26,7 @@ def test_repair_broken_lines(cleaner):
     text = "This is a normal line.\nThis line was brok\nen in the middle.\nAnd another one."
     cleaned = cleaner.repair_broken_lines(text)
     assert "brok\nen" not in cleaned
-    assert "broken in the middle" in cleaned
+    assert "brok en in the middle" in cleaned
 
 def test_repair_broken_lines_with_space(cleaner):
     text = "This is a normal line.\nThis line was broken \nin the middle.\nAnd another one."

@@ -1,9 +1,9 @@
 """
-LLM Cleaner for NoiRAG — Dual-Backend Support (Ollama / OpenAI)
+LLM Cleaner for NoiRAG -- Dual-Backend Support (Ollama / OpenAI)
 
 Supports two backends for text repair:
-  1. "ollama"  → Free, local, offline. Uses qwen2.5:0.5b.
-  2. "openai"  → Paid, cloud-based. Uses gpt-4o-mini.
+  1. "ollama"  -> Free, local, offline. Uses qwen2.5:0.5b.
+  2. "openai"  -> Paid, cloud-based. Uses gpt-4o-mini.
 
 To switch: Change the single variable below ↓
 """
@@ -13,11 +13,11 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# ╔══════════════════════════════════════════════════════════════╗
-# ║  SWITCH BACKEND HERE — Change "ollama" to "openai" or "groq" ║
-# ╚══════════════════════════════════════════════════════════════╝
+# +==============================================================+
+# |  SWITCH BACKEND HERE -- Change "ollama" to "openai" or "groq" |
+# +==============================================================+
 BACKEND = "groq"
-# ════════════════════════════════════════════════════════════════
+# ================================================================
 
 
 class LLMCleaner:
@@ -56,11 +56,11 @@ class LLMCleaner:
         if backend == "openai":
             self.api_key = os.getenv("OPENAI_API_KEY")
             if not self.api_key:
-                print("⚠ WARNING: OPENAI_API_KEY not found in .env file!")
+                print("[WARNING] OPENAI_API_KEY not found in .env file!")
         elif backend == "groq":
             self.api_key = os.getenv("GROQ_API_KEY")
             if not self.api_key:
-                print("⚠ WARNING: GROQ_API_KEY not found in .env file!")
+                print("[WARNING] GROQ_API_KEY not found in .env file!")
 
         self.system_prompt = (
             "You are a strict, automated OCR-repair engine. Your ONLY purpose is to fix OCR errors, typos, "
@@ -72,7 +72,7 @@ class LLMCleaner:
             "4. Leave valid proper nouns and acronyms completely untouched."
         )
 
-        print(f"LLM Cleaner initialized → Backend: {self.backend} | Model: {self.model}")
+        print(f"LLM Cleaner initialized -> Backend: {self.backend} | Model: {self.model}")
 
     def clean(self, text: str) -> str:
         """Send the text to the active LLM backend for repair."""
@@ -88,7 +88,7 @@ class LLMCleaner:
             print(f"LLM Cleaner [{self.backend}] connection failed: {e}")
             return text
 
-    # ── Ollama Backend ───────────────────────────────────────
+    # -- Ollama Backend ---------------------------------------
     def _clean_ollama(self, text: str) -> str:
         payload = {
             "model": self.model,
@@ -105,7 +105,7 @@ class LLMCleaner:
             print(f"Ollama Error: {response.status_code} - {response.text}")
             return text
 
-    # ── OpenAI/Groq Backend ───────────────────────────────────────
+    # -- OpenAI/Groq Backend ---------------------------------------
     def _clean_openai(self, text: str) -> str:
         import time
         headers = {
@@ -122,17 +122,16 @@ class LLMCleaner:
             "max_tokens": 2048
         }
         
-        max_retries = 5
+        max_retries = 1
         for attempt in range(max_retries):
-            response = requests.post(self.api_url, headers=headers, json=payload, timeout=120)
+            response = requests.post(self.api_url, headers=headers, json=payload, timeout=30)
             if response.status_code == 200:
                 return response.json()['choices'][0]['message']['content'].strip()
             elif response.status_code == 429:
-                print(f"API Error 429: Rate limit reached. Sleeping for 35 seconds (Attempt {attempt+1}/{max_retries})...")
-                time.sleep(35)
+                print(f"API 429: Rate limited -- falling back to local cleaners.")
+                return text  # return original immediately, hybrid fallback handles it
             else:
                 print(f"API Error: {response.status_code} - {response.text}")
                 return text
                 
-        print("Max retries reached. Returning original uncleaned text.")
         return text

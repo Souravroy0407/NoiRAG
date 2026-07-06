@@ -19,7 +19,7 @@ class HybridCleaner:
     def __init__(
         self, 
         formatting_threshold: float = 0.05,
-        semantic_threshold: float = 0.10,
+        semantic_threshold: float = 0.15,
         llm_threshold: float = 0.75,
         verbose: bool = False
     ):
@@ -61,10 +61,18 @@ class HybridCleaner:
         cleaned_text = text
         applied_cleaners = []
         
-        # 0. Catastrophic Noise -> Route directly to LLM
+        # 0. Catastrophic Noise -> Try LLM first, fall back to Rule+Stat if it fails
         if apply_llm:
-            cleaned_text = self.llm_cleaner.clean(cleaned_text)
-            applied_cleaners.append("llm")
+            llm_result = self.llm_cleaner.clean(cleaned_text)
+            # If LLM succeeded (returned different text), use it
+            if llm_result != cleaned_text:
+                cleaned_text = llm_result
+                applied_cleaners.append("llm")
+            else:
+                # LLM failed (rate limit / error) — fall back to local cleaners
+                cleaned_text = self.rule_cleaner.clean(cleaned_text)
+                cleaned_text = self.stat_cleaner.clean(cleaned_text)
+                applied_cleaners.append("rule+stat (llm_fallback)")
         else:
             # 1. Rule-based First (Fixing line breaks helps the spell-checker)
             if apply_rule:
@@ -75,6 +83,16 @@ class HybridCleaner:
             if apply_stat:
                 cleaned_text = self.stat_cleaner.clean(cleaned_text)
                 applied_cleaners.append("statistical")
+        
+        # ── Content Preservation Guard ──────────────────────────────────
+        # If cleaning removed too much content (>15% of text lost),
+        # the original noisy text is better than a gutted cleaned version.
+        original_len = len(text.strip())
+        cleaned_len = len(cleaned_text.strip())
+        if original_len > 0 and cleaned_len / original_len < 0.85:
+            cleaned_text = text  # revert to original
+            applied_cleaners = ["bypassed (content_guard)"]
+        # ────────────────────────────────────────────────────────────────
             
         if self.verbose:
             print(f"Scores: Overall={scores['overall_score']:.3f}, OOV={scores['oov_ratio']:.3f}, "

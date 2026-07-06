@@ -32,7 +32,7 @@ from scipy import stats
 from codecarbon import EmissionsTracker
 
 
-# ── Config ────────────────────────────────────────────────────────────────────
+# -- Config --------------------------------------------------------------------
 DATA_DIR       = PROJECT_ROOT / "data"
 GT_DIR         = DATA_DIR / "ground_truth" / "gt"
 NOISY_DIR      = DATA_DIR / "noisy"
@@ -42,7 +42,7 @@ QA_DIR         = DATA_DIR / "qa"
 RESULTS_DIR    = PROJECT_ROOT / "results" / "tables"
 K_VALUES       = [1, 3, 5]
 TOP_K          = 5
-# ─────────────────────────────────────────────────────────────────────────────
+# -----------------------------------------------------------------------------
 
 
 def load_qa_pairs(limit: int = 0) -> List[Dict[str, Any]]:
@@ -71,16 +71,16 @@ def ensure_chunks_and_index(name: str, source_dir: Path) -> tuple:
 
     # Check if already built
     if chunks_path.exists() and index_path.exists() and meta_path.exists():
-        print(f"  ✅ Index already exists for '{name}' — skipping build")
+        print(f"  [OK] Index already exists for '{name}' -- skipping build")
         return chunks_path, index_path, meta_path
 
     # Build chunks
-    print(f"  📦 Chunking {source_dir}...")
+    print(f"  [CHUNK] Chunking {source_dir}...")
     chunks = chunk_directory(source_dir)
     save_chunks(chunks, chunks_path)
 
     # Build embeddings + index
-    print(f"  🧬 Embedding {len(chunks)} chunks...")
+    print(f"  [EMBED] Embedding {len(chunks)} chunks...")
     embeddings = embed_chunks(chunks)
     index = build_faiss_index(embeddings)
     save_index(index, chunks, INDEX_DIR, name)
@@ -133,9 +133,9 @@ def run_experiment(
     metrics = evaluate_retrieval(retrieval_results, K_VALUES)
 
     # Pretty print
-    print(f"\n{'─'*40}")
+    print(f"\n{'-'*40}")
     print(f"  Results: {name}")
-    print(f"{'─'*40}")
+    print(f"{'-'*40}")
     for metric, value in metrics.items():
         if metric != "mrr_scores_list":
             print(f"  {metric:>10}: {value:.4f}")
@@ -154,7 +154,7 @@ def save_results(all_experiments: List[Dict[str, Any]], filename: str = "baselin
 
     with open(output_path, "w", encoding="utf-8") as f:
         json.dump(all_experiments, f, indent=2, ensure_ascii=False)
-    print(f"\n💾 Results saved: {output_path}")
+    print(f"\n[SAVED] Results saved: {output_path}")
 
 
 def print_comparison_table(all_experiments: List[Dict[str, Any]]):
@@ -189,7 +189,7 @@ def print_comparison_table(all_experiments: List[Dict[str, Any]]):
     print(f"{'='*len(header)}")
 
 
-# ── CLI ───────────────────────────────────────────────────────────────────────
+# -- CLI -----------------------------------------------------------------------
 if __name__ == "__main__":
     import argparse
 
@@ -208,7 +208,7 @@ if __name__ == "__main__":
     tracker.start()
 
     try:
-        print("NoiseClear-RAG — Baseline Experiment Runner")
+        print("NoiseClear-RAG -- Baseline Experiment Runner")
         print(f"Project root: {PROJECT_ROOT}\n")
 
         # Load QA pairs
@@ -218,12 +218,12 @@ if __name__ == "__main__":
 
         all_experiments = []
 
-        # ── Experiment 1: Clean baseline ──────────────────────────────────────
-        print("▸ Running CLEAN baseline...")
+        # -- Experiment 1: Clean baseline --------------------------------------
+        print("[>] Running CLEAN baseline...")
         clean_result = run_experiment("gt", GT_DIR, qa_pairs)
         all_experiments.append(clean_result)
 
-        # ── Experiment 2+: Noisy baselines ────────────────────────────────────
+        # -- Experiment 2+: Noisy baselines ------------------------------------
         if args.noisy:
             types = [args.noise_type] if args.noise_type else ["semantic", "formatting"]
             levels = [args.noise_level] if args.noise_level else [10, 25, 50, 75]
@@ -234,17 +234,17 @@ if __name__ == "__main__":
                     noisy_dir = NOISY_DIR / noisy_name
 
                     if not noisy_dir.exists() or not any(noisy_dir.iterdir()):
-                        print(f"\n⚠️ Skipping {noisy_name} — no data in {noisy_dir}")
+                        print(f"\n[WARNING] Skipping {noisy_name} -- no data in {noisy_dir}")
                         print(f"   Run: python -m baseline.noise_injector --type {ntype} --level {nlevel}")
                         continue
 
                     result = run_experiment(noisy_name, noisy_dir, qa_pairs)
                     all_experiments.append(result)
 
-        # ── Summary ───────────────────────────────────────────────────────────
+        # -- Summary -----------------------------------------------------------
         print_comparison_table(all_experiments)
         
-        # ── Statistical Test ──────────────────────────────────────────────────
+        # -- Statistical Test --------------------------------------------------
         gt_exp = next((exp for exp in all_experiments if exp["name"] == "gt"), None)
         if gt_exp and len(all_experiments) > 1:
             print(f"\n{'='*60}")
@@ -271,17 +271,17 @@ if __name__ == "__main__":
         # Stop tracker and capture emissions so it can be saved in JSON
         emissions = tracker.stop()
         if emissions is not None:
-            print(f"\n🌱 Total Carbon Emissions: {emissions:.6f} kg CO2eq")
+            print(f"\n[ECO] Total Carbon Emissions: {emissions:.6f} kg CO2eq")
             all_experiments.append({
                 "name": "sustainability",
                 "metrics": {"carbon_emissions_kg_co2eq": emissions},
                 "num_queries": 0
             })
         else:
-            print("\n🌱 Could not determine carbon emissions.")
+            print("\n[ECO] Could not determine carbon emissions.")
 
         save_results(all_experiments)
 
-        print("\n🎉 Baseline experiments complete!")
+        print("\n[DONE] Baseline experiments complete!")
     finally:
         tracker.stop()

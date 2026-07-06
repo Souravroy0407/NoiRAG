@@ -74,7 +74,7 @@ def apply_preprocessing(
             
         print(f"      Cleaned {domain_dir.name}: {len(json_files)} docs")
 
-    print(f"      ✅ Preprocessing Complete: {total_docs} docs, {total_pages} pages")
+    print(f"      [OK] Preprocessing Complete: {total_docs} docs, {total_pages} pages")
 
 # ── CLI ───────────────────────────────────────────────────────────────────────
 if __name__ == "__main__":
@@ -113,7 +113,7 @@ if __name__ == "__main__":
     else:
         print(f"\n[1/4] Skipping Preprocessing. Using existing data at {cleaned_dir}")
         if not cleaned_dir.exists():
-            print(f"⚠️ Warning: Cleaned directory does not exist: {cleaned_dir}")
+            print(f"[WARNING] Cleaned directory does not exist: {cleaned_dir}")
 
     # 2. Load QA Pairs
     print("\n[2/4] Loading QA Evaluation Pairs...")
@@ -142,4 +142,4 @@ if __name__ == "__main__":
     output_meta = f"hybrid_evaluation_{noise_name}.json"
     save_results(all_experiments, filename=output_meta)
 
-    print(f"\n🎉 NoiRAG Evaluation Complete for {noise_name}!")
+    print(f"\n[DONE] NoiRAG Evaluation Complete for {noise_name}!")

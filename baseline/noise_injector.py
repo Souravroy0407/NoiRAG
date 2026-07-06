@@ -23,17 +23,17 @@ from pathlib import Path
 from typing import List, Dict, Any
 
 
-# ── Config ────────────────────────────────────────────────────────────────────
+# -- Config --------------------------------------------------------------------
 PROJECT_ROOT   = Path(__file__).resolve().parent.parent
 GT_DIR         = PROJECT_ROOT / "data" / "ground_truth" / "gt"
 NOISY_DIR      = PROJECT_ROOT / "data" / "noisy"
 NOISE_TYPES    = ["semantic", "formatting"]
 NOISE_LEVELS   = [10, 25, 50, 75]
 RANDOM_SEED    = 42
-# ─────────────────────────────────────────────────────────────────────────────
+# -----------------------------------------------------------------------------
 
 
-# ── Semantic Noise (character-level OCR errors) ──────────────────────────────
+# -- Semantic Noise (character-level OCR errors) ------------------------------
 
 # Common OCR character confusions
 CHAR_CONFUSIONS = {
@@ -121,11 +121,11 @@ def inject_semantic_noise(text: str, level: float, rng: random.Random) -> str:
     return " ".join(words)
 
 
-# ── Formatting Noise (structure-level OCR errors) ────────────────────────────
+# -- Formatting Noise (structure-level OCR errors) ----------------------------
 
 GARBAGE_STRINGS = [
-    "•", "■", "▪", "▸", "◆", " | ", " — ", "...", "***",
-    "\n\n", "  ", "\t", "  —  ", ">> ", "<< ", "## ",
+    "•", "■", "▪", "[>]", "◆", " | ", " -- ", "...", "***",
+    "\n\n", "  ", "\t", "  --  ", ">> ", "<< ", "## ",
     "[...]", "(?)", "{~}", "//", "---", "===",
 ]
 
@@ -186,7 +186,7 @@ def inject_formatting_noise(text: str, level: float, rng: random.Random) -> str:
     return result
 
 
-# ── Main Injection Logic ─────────────────────────────────────────────────────
+# -- Main Injection Logic -----------------------------------------------------
 
 def inject_noise_to_doc(
     doc_pages: List[Dict[str, Any]],
@@ -255,15 +255,15 @@ def process_all(
             total_pages += len(pages)
 
         if verbose:
-            print(f"  {domain}: {len(json_files)} docs → {out_domain}")
+            print(f"  {domain}: {len(json_files)} docs -> {out_domain}")
 
     if verbose:
-        print(f"\n✅ {noise_type}_{level}: {total_docs} docs, {total_pages} pages → {output_dir}")
+        print(f"\n[OK] {noise_type}_{level}: {total_docs} docs, {total_pages} pages -> {output_dir}")
 
     return total_docs
 
 
-# ── CLI ───────────────────────────────────────────────────────────────────────
+# -- CLI -----------------------------------------------------------------------
 if __name__ == "__main__":
     import argparse
 
@@ -286,7 +286,7 @@ if __name__ == "__main__":
 
     for ntype in types:
         for nlevel in levels:
-            print(f"── {ntype} @ {nlevel}% ──")
+            print(f"-- {ntype} @ {nlevel}% --")
             process_all(ntype, nlevel, args.limit)
             print()
 

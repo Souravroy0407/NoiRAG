@@ -7,7 +7,7 @@ from noirag.preprocessing.hybrid.llm_cleaner import LLMCleaner
 
 @patch('requests.post')
 def test_successful_ollama_cleaning(mock_post):
-    cleaner = LLMCleaner()
+    cleaner = LLMCleaner("ollama")
     
     # Mock a successful local Ollama response
     mock_response = MagicMock()
@@ -25,7 +25,7 @@ def test_successful_ollama_cleaning(mock_post):
 
 @patch('requests.post')
 def test_ollama_connection_failure_returns_original(mock_post):
-    cleaner = LLMCleaner()
+    cleaner = LLMCleaner("ollama")
     
     import requests
     mock_post.side_effect = requests.exceptions.ConnectionError("Connection Refused")

@@ -19,7 +19,7 @@ from typing import List, Dict, Any
 from pathlib import Path
 
 
-# ── OpenAI Pricing (as of 2025) ─────────────────────────────────────────────
+# OpenAI Pricing (as of 2025)
 # Source: https://openai.com/api/pricing
 # These are used ONLY for counterfactual estimation, not actual API calls.
 PRICING = {
@@ -35,9 +35,8 @@ PRICING = {
     },
 }
 
-# Standard token approximation: 1 token ≈ 4 characters
+# Standard token approximation: 1 token ~ 4 characters
 CHARS_PER_TOKEN = 4
-# ─────────────────────────────────────────────────────────────────────────────
 
 
 @dataclass
@@ -120,19 +119,19 @@ class CostProfiler:
         Assumptions:
             - Every chunk is sent as a separate API request.
             - Input tokens = chunk text + ~50 tokens for the system prompt.
-            - Output tokens ≈ input tokens (the LLM returns the cleaned text,
+            - Output tokens ~ input tokens (the LLM returns the cleaned text,
               roughly the same length).
             - No batching, no caching, no parallelism (worst-case sequential).
         """
         pricing = PRICING[model]
-        system_prompt_tokens = 80  # Our system prompt is ~320 chars ≈ 80 tokens
+        system_prompt_tokens = 80  # Our system prompt is ~320 chars ~ 80 tokens
         
         total_input_tokens = 0
         total_output_tokens = 0
         
         for rec in self.records:
             input_tokens = rec.estimated_tokens + system_prompt_tokens
-            output_tokens = rec.estimated_tokens  # Output ≈ same length as input
+            output_tokens = rec.estimated_tokens  # Output ~ same length as input
             total_input_tokens += input_tokens
             total_output_tokens += output_tokens
         
@@ -214,7 +213,7 @@ class CostProfiler:
         report = self.generate_report()
         
         if "error" in report:
-            print(f"\n⚠️  Profiler: {report['error']}")
+            print(f"\n[WARNING] Profiler: {report['error']}")
             return
         
         s = report["summary"]
@@ -226,18 +225,18 @@ class CostProfiler:
         w = 64  # Box width
         
         print()
-        print("╔" + "═" * w + "╗")
-        print("║" + "NoiRAG Cost & Efficiency Report".center(w) + "║")
-        print("╠" + "═" * w + "╣")
+        print("+" + "=" * w + "+")
+        print("|" + "NoiRAG Cost & Efficiency Report".center(w) + "|")
+        print("+" + "=" * w + "+")
         
-        # ── Chunk Summary
-        print("║" + f"  Total Chunks Processed:  {s['total_chunks']:>10,}".ljust(w) + "║")
-        print("║" + f"  Total Tokens (est.):     {s['total_estimated_tokens']:>10,}".ljust(w) + "║")
-        print("║" + f"  NoiRAG Processing Time:  {s['noirag_preprocessing_time_seconds']:>8.1f}s".ljust(w) + "║")
-        print("║" + "─" * w + "║")
+        # Chunk Summary
+        print("|" + f"  Total Chunks Processed:  {s['total_chunks']:>10,}".ljust(w) + "|")
+        print("|" + f"  Total Tokens (est.):     {s['total_estimated_tokens']:>10,}".ljust(w) + "|")
+        print("|" + f"  NoiRAG Processing Time:  {s['noirag_preprocessing_time_seconds']:>8.1f}s".ljust(w) + "|")
+        print("|" + "-" * w + "|")
         
-        # ── Routing Breakdown
-        print("║" + "  Routing Breakdown:".ljust(w) + "║")
+        # Routing Breakdown
+        print("|" + "  Routing Breakdown:".ljust(w) + "|")
         
         labels = {
             "bypassed": "Bypassed (clean)",
@@ -250,31 +249,31 @@ class CostProfiler:
         for category, data in r.items():
             label = labels.get(category, category)
             line = f"    {label:<22} {data['count']:>6,}  ({data['percentage']:>5.1f}%)"
-            print("║" + line.ljust(w) + "║")
+            print("|" + line.ljust(w) + "|")
         
-        print("║" + "─" * w + "║")
+        print("|" + "-" * w + "|")
         
-        # ── API Calls Avoided
-        print("║" + f"  🚫 LLM API Calls Avoided:".ljust(w) + "║")
+        # API Calls Avoided
+        print("|" + "  LLM API Calls Avoided:".ljust(w) + "|")
         avoided_line = f"    {avoided['avoided']:,} / {avoided['total']:,}  ({avoided['percentage']:.1f}%)"
-        print("║" + f"    {avoided_line}".ljust(w) + "║")
+        print("|" + f"    {avoided_line}".ljust(w) + "|")
         
-        print("║" + "─" * w + "║")
+        print("|" + "-" * w + "|")
         
-        # ── Cost Comparison
-        print("║" + "  💰 Cost Comparison (if all chunks sent to LLM):".ljust(w) + "║")
-        print("║" + f"    GPT-4o-mini would cost:   ${mini['total_cost_usd']:>8.4f}".ljust(w) + "║")
-        print("║" + f"    GPT-4o would cost:        ${premium['total_cost_usd']:>8.4f}".ljust(w) + "║")
-        print("║" + f"    NoiRAG actual cost:        ${'0.0000':>8}  (local)".ljust(w) + "║")
+        # Cost Comparison
+        print("|" + "  Cost Comparison (if all chunks sent to LLM):".ljust(w) + "|")
+        print("|" + f"    GPT-4o-mini would cost:   ${mini['total_cost_usd']:>8.4f}".ljust(w) + "|")
+        print("|" + f"    GPT-4o would cost:        ${premium['total_cost_usd']:>8.4f}".ljust(w) + "|")
+        print("|" + f"    NoiRAG actual cost:        ${'0.0000':>8}  (local)".ljust(w) + "|")
         
-        print("║" + "─" * w + "║")
+        print("|" + "-" * w + "|")
         
-        # ── Network Independence
-        print("║" + "  📡 Network Independence:".ljust(w) + "║")
-        print("║" + "    ✅ Runs fully offline — zero external API dependencies".ljust(w) + "║")
-        print("║" + "    ✅ No rate limits, no API keys, no data leaves machine".ljust(w) + "║")
+        # Network Independence
+        print("|" + "  Network Independence:".ljust(w) + "|")
+        print("|" + "    [OK] Offline-first architecture".ljust(w) + "|")
+        print("|" + "    [OK] No rate limits, no data leaves machine".ljust(w) + "|")
         
-        print("╚" + "═" * w + "╝")
+        print("+" + "=" * w + "+")
         print()
 
     def save_report(self, path: Path):
@@ -286,4 +285,4 @@ class CostProfiler:
         with open(path, "w", encoding="utf-8") as f:
             json.dump(report, f, indent=2, ensure_ascii=False)
         
-        print(f"💾 Cost report saved: {path}")
+        print(f"[SAVED] Cost report saved: {path}")

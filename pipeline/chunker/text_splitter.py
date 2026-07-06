@@ -13,10 +13,10 @@ from pathlib import Path
 from typing import List, Dict, Any
 
 
-# ── Config ───────────────────────────────────────────────────────────────────
+# -- Config -------------------------------------------------------------------
 CHUNK_SIZE    = 512  # words per chunk (≈ 400 tokens, fits bge-small-en-v1.5's 512-token limit)
 CHUNK_OVERLAP = 64   # words overlap between consecutive chunks
-# ─────────────────────────────────────────────────────────────────────────────
+# -----------------------------------------------------------------------------
 
 
 def load_doc(json_path: str | Path) -> str:
@@ -99,10 +99,10 @@ def chunk_directory(
         chunks = chunk_file(jf, chunk_size, overlap)
         all_chunks.extend(chunks)
         if verbose and (i + 1) % 100 == 0:
-            print(f"  Chunked {i+1}/{len(json_files)} files — {len(all_chunks)} chunks so far")
+            print(f"  Chunked {i+1}/{len(json_files)} files -- {len(all_chunks)} chunks so far")
 
     if verbose:
-        print(f"\nDone: {len(json_files)} docs → {len(all_chunks)} chunks")
+        print(f"\nDone: {len(json_files)} docs -> {len(all_chunks)} chunks")
         print(f"Avg chunks/doc: {len(all_chunks)/len(json_files):.1f}")
 
     return all_chunks
@@ -114,10 +114,10 @@ def save_chunks(chunks: List[Dict[str, Any]], output_path: str | Path) -> None:
     output_path.parent.mkdir(parents=True, exist_ok=True)
     with open(output_path, "w", encoding="utf-8") as f:
         json.dump(chunks, f, ensure_ascii=False, indent=2)
-    print(f"Saved {len(chunks)} chunks → {output_path}")
+    print(f"Saved {len(chunks)} chunks -> {output_path}")
 
 
-# ── CLI ───────────────────────────────────────────────────────────────────────
+# -- CLI -----------------------------------------------------------------------
 if __name__ == "__main__":
     import argparse
 
